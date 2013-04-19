@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+	 http://www.springframework.org/schema/beans
+	 http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	 http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+ 	
+ 	
+	<!-- <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName">
+			<value>java:comp/env/jdbc/myoracle</value>
+		</property>
+	</bean> 
+	-->
+	
+<!--  	<context:annotation-config /> -->
+
+
+	 <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver">
+		</property>
+		
+<!--  		<property name="url" value="jdbc:oracle:thin:@localhost:1521:orcl"/>   -->
+ 		<property name="url" value="jdbc:oracle:thin:@192.168.112.238:1521:testdata"/>  
+<!-- 		<property name="url" value="jdbc:oracle:thin:@192.168.111.250:1521:gzepdb"/>  -->
+		<property name="username" value="portal"></property>
+		<property name="password" value="portal"></property>
+		 
+		<property name="initialSize" value="1"></property>
+		<property name="minIdle" value="1"></property>
+		<property name="maxIdle" value="8"></property>
+		<property name="maxActive" value="8"></property>
+		
+		<property name="testOnBorrow" value="true"></property>    
+ 		<property name="testOnReturn" value="true"></property> 
+  		<property name="testWhileIdle" value="true"></property> 
+ 		<property name="validationQuery" value="select 1 from dual"></property>  
+	</bean> 
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">
+					org.hibernate.dialect.Oracle9iDialect
+				</prop>
+				<!-- <prop key="hibernate.hbm2ddl.auto">update</prop> -->
+				<prop key="hibernate.connection.release_mode">after_transaction</prop>
+				<prop key="hibernate.show_sql">true</prop>
+<!-- 				<prop key="hibernate.format_sql">true</prop> -->
+				<prop key="hibernate.autoReconnect">true</prop>
+				<prop key="javax.persistence.validation.mode">none</prop>
+			</props>
+		</property>
+		<property name="packagesToScan">
+			<list>
+				<value>com.gzeport.app.casserver.pojo</value>
+			</list>
+		</property>
+	</bean>
+
+	<!-- 配置事务管理器bean,使用HibernateTransactionManager事务管理器 -->
+<!--  	<tx:annotation-driven transaction-manager="txMgr" />   -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<!-- 为事务管理器注入sessionFactory" -->
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+  	<!-- 定义事务传播属性 -->
+	 <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="*" propagation="REQUIRED" />
+        </tx:attributes>
+    </tx:advice>
+	
+	  <aop:config>
+        <aop:pointcut id="interceptorPointCuts"
+            expression="execution(* com.gzeport.app.casserver.service.*.*(..))" />
+        <aop:advisor advice-ref="txAdvice"
+            pointcut-ref="interceptorPointCuts" />        
+    </aop:config>   
+	<!-- END DATASOURCE & TRANSACTION DEFINITION  -->
+</beans>

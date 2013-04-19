@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+	<description>
+		Defines the cookie that stores the TicketGrantingTicket.  You most likely should never modify these (especially the "secure" property).
+		You can change the name if you want to make it harder for people to guess.
+	</description>
+	<!-- 	p:cookieSecure="true" 取消https  与deployerConfigContext.xml的参数保持一致  p:requireSecure="false"   
+    2、	p:cookieMaxAge="-1" 简单说是COOKIE的最大生命周期-1为无生命周期即只在当前打开的IE窗口有效IE关闭或重新打开其它窗口仍会要求验证
+	-->
+	<bean id="ticketGrantingTicketCookieGenerator" class="org.jasig.cas.web.support.CookieRetrievingCookieGenerator"
+		p:cookieSecure="false"
+		p:cookieMaxAge="-1"
+		p:cookieName="CASTGC"
+		p:cookiePath="/cas" />
+</beans>
